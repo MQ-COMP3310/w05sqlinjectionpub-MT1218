@@ -127,12 +127,17 @@ public class SQLiteConnectionManager {
      */
     public void addValidWord(int id, String word) {
 
-        String sql = "INSERT INTO validWords(id,word) VALUES('" + id + "','" + word + "')";
+        String sql = "INSERT INTO validWords(id,word) VALUES(?,?)";
 
         try (Connection conn = DriverManager.getConnection(databaseURL);
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.setString(2, word);
             pstmt.executeUpdate();
-        } catch (SQLException e) {
+        } 
+
+        catch (SQLException e) {
             System.out.println(e.getMessage());
         }
 
@@ -145,10 +150,17 @@ public class SQLiteConnectionManager {
      * @return true if guess exists in the database, false otherwise
      */
     public boolean isValidWord(String guess) {
-        String sql = "SELECT count(id) as total FROM validWords WHERE word like'" + guess + "';";
+
+        // Build query with wildcard instead of concatenating guess
+        // Why this works - rather than executing the query using guess, it will treat the guess as a value
+        // So instaead it will search for guess i.e. if the injection was ' OR 1=1 -- it would search for it rather than execute it
+        String sql = "SELECT count(id) as total FROM validWords WHERE word like ?";
 
         try (Connection conn = DriverManager.getConnection(databaseURL);
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+            // Set the wildcard value to the user's input
+            stmt.setString(1, guess);
 
             ResultSet resultRows = stmt.executeQuery();
             if (resultRows.next()) {
@@ -157,11 +169,11 @@ public class SQLiteConnectionManager {
             }
 
             return false;
+        }
 
-        } catch (SQLException e) {
+        catch (SQLException e) {
             System.out.println(e.getMessage());
             return false;
         }
-
     }
 }
