@@ -23,7 +23,8 @@ public class SQLiteConnectionManager {
         // loads logging.properties from the classpath
         try {// resources\logging.properties
             LogManager.getLogManager().readConfiguration(new FileInputStream("resources/logging.properties"));
-        } catch (SecurityException | IOException e1) {
+        } 
+        catch (SecurityException | IOException e1) {
             e1.printStackTrace();
         }
     }
@@ -51,7 +52,6 @@ public class SQLiteConnectionManager {
      */
     public SQLiteConnectionManager(String filename) {
         databaseURL = "jdbc:sqlite:sqlite/" + filename;
-
     }
 
     /**
@@ -64,12 +64,13 @@ public class SQLiteConnectionManager {
         try (Connection conn = DriverManager.getConnection(databaseURL)) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                logger.log(Level.INFO,"The driver name is " + meta.getDriverName());
+                logger.log(Level.INFO,"A new database has been created.");
 
             }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } 
+        catch (SQLException e) {
+            logger.log(Level.WARNING,"The following exception occured when trying to create a new database: " + e.getMessage());
         }
     }
 
@@ -87,8 +88,9 @@ public class SQLiteConnectionManager {
                 if (conn != null) {
                     return true;
                 }
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
+            } 
+            catch (SQLException e) {
+                logger.log(Level.WARNING,"The following exception occured when trying to check if the file has been created: " + e.getMessage());
                 return false;
             }
         }
@@ -112,8 +114,9 @@ public class SQLiteConnectionManager {
                 stmt.execute(VALID_WORDS_CREATE_STRING);
                 return true;
 
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
+            } 
+            catch (SQLException e) {
+                logger.log(Level.WARNING,"The following exception occured when trying to create the table structures: " + e.getMessage());
                 return false;
             }
         }
@@ -138,7 +141,7 @@ public class SQLiteConnectionManager {
         } 
 
         catch (SQLException e) {
-            System.out.println(e.getMessage());
+            logger.log(Level.WARNING,"The following exception occured when trying to run the addValidWord method" + e.getMessage());
         }
 
     }
@@ -172,7 +175,7 @@ public class SQLiteConnectionManager {
         }
 
         catch (SQLException e) {
-            System.out.println(e.getMessage());
+            logger.log(Level.WARNING,"The following exception occured when running the isValidWord method: " + e.getMessage());
             return false;
         }
     }
